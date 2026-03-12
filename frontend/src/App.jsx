@@ -1,6 +1,5 @@
 import { useState,useEffect } from 'react'
 import MedicamentoList from './MedicamentoList' 
-// import MedicamentoForm from './MedicamentoForm'
 import UploadFile from './upload'
 import './App.css'
 
@@ -21,7 +20,6 @@ function App() {
 
   return <>
     <MedicamentoList Medicamento={Medicamento}/>
-    {/* <MedicamentoForm/> */}
     <UploadFile/>
   </>
 }

@@ -9,7 +9,7 @@ const MedicamentoList = ({Medicamento}) => {
                 <tr>
                     <th>Estabelecimento de Saúde</th>
                     <th>Codigo do Medicamento</th>
-                    <th>Nome do Medicamento</th>
+                    <th>Medicamento</th>
                     <th>Quantidade</th>
                     <th>Ações</th>
                 </tr>
@@ -18,15 +18,11 @@ const MedicamentoList = ({Medicamento}) => {
 
             <tbody>
                 {Medicamento.map((item) => (
-                    <tr key={item.codigoMedicamento}>
+                    <tr key={item.catmat}>
                         <td>{item.estabelecimentoSaude}</td>
-                        <td>{item.codigoMedicamento}</td>
-                        <td>{item.nomeMedicamento}</td>
+                        <td>{item.catmat}</td>
+                        <td>{item.medicamento}</td>
                         <td>{item.quantidade}</td>
-                        <td> 
-                            <button onClick={''} >Update</button>
-                            <button>Delete</button>
-                        </td>
                     </tr>
                 ))}
                 

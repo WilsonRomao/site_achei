@@ -9,34 +9,37 @@ const UploadFile = () => {
   }
 
   const onSubmit = async (e) => {
-    e.preventDefault()
-    if (!file) return alert("Please select a file first!")
+    e.preventDefault(); // Impede o browser de recarregar antes da hora
+    
+    if (!file) return alert("Por favor, selecione um arquivo primeiro!");
 
-    const url = "http://127.0.0.1:5000/upload"
+    // Ajuste para a porta 8000 se estiver usando o seu script Uvicorn
+    const url = "http://127.0.0.1:5000/upload"; 
 
-    // 1. Create a FormData object
-    const formData = new FormData()
-    // 2. Append the file (matching the key your backend expects)
-    formData.append("file", file)
-
-    const options = {
-      method: "POST",
-      body: formData,
-    }
+    const formData = new FormData();
+    formData.append("file", file);
 
     try {
-      const response = await fetch(url, options)
-      const data = await response.json()
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
 
-      if (response.status !== 201 && response.status !== 200) {
-        alert(data.message || "Upload failed")
+      if (response.ok) {
+        // O alert bloqueia a execução. O código abaixo só roda após o "OK"
+        alert("Arquivo enviado com sucesso!");
+        
+        // Recarrega a página atual
+        window.location.reload(); 
       } else {
-        alert("File uploaded successfully!")
+        const data = await response.json();
+        alert(data.message || "Falha no upload");
       }
     } catch (error) {
-      console.error("Error uploading file:", error)
+      console.error("Erro ao enviar:", error);
+      alert("Erro de conexão com o servidor.");
     }
-  }
+  };
 
   return <div>
     <p> Atualize o banco de daos</p>
