@@ -1,33 +1,31 @@
-import os
-import pandas as pd
-from sqlalchemy import create_engine
-from config import app ,db
 from processamento import processar_r84
-
+from models import Medicamento
+from config import db, app
 
 def etl(fileName):
-    #____EXTRAÇÃO E TRANSFORMAÇÃO___________________________
-    medicamentos = processar_r84(fileName)
+    # Chama o processamento do arquivo e retorna um DataFrame limpo
+    df_limpo = processar_r84(fileName)
+    
+    with app.app_context():
+        for _, row in df_limpo.iterrows():
+            # Busca se o par (catmat, estabelecimento) já existe
+            existente = Medicamento.query.filter_by(
+                catmat=row['catmat'], 
+                estabelecimento_saude=row['estabelecimento_saude']
+            ).first()
 
-    #____CARREGA AS INFORMAÇÕES NO BANCO DE DADOS____________
-
-    # Configuração da conexão
-    engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
-    try:
-        medicamentos.to_sql('medicamento', con=db.engine, if_exists='replace', index=False)
-        print("Pipeline finalizado: Dados inseridos no banco.")
-    except Exception as e:
-        print(f"Erro ao inserir no banco: {e}")
-        raise e # Relança o erro para o Flask capturar no bloco try/except dele
-
-
-    # print(medicamentos_df)
-
-    #__Salva os dados no bd
-
-
-
-
-
-
-
+            if existente:
+                # Atualiza a quantidade se já existir
+                existente.quantidade = row['quantidade']
+                existente.medicamento = row['medicamento']
+            else:
+                # Cria novo se não existir
+                novo = Medicamento(
+                    catmat=row['catmat'],
+                    medicamento=row['medicamento'],
+                    quantidade=row['quantidade'],
+                    estabelecimento_saude=row['estabelecimento_saude']
+                )
+                db.session.add(novo)
+        
+        db.session.commit()
