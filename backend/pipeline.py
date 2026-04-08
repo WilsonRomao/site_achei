@@ -1,10 +1,11 @@
-from processamento import processar_r84
+from processamento_2 import limpeza_dos_dados
+# from processamento import processar_r84
 from models import Medicamento
 from config import db, app
 
 def etl(fileName):
     # Chama o processamento do arquivo e retorna um DataFrame limpo
-    df_limpo = processar_r84(fileName)
+    df_limpo = limpeza_dos_dados(fileName)
     
     with app.app_context():
         for _, row in df_limpo.iterrows():
