@@ -1,5 +1,6 @@
 # contem as rotas e endpoints
 from flask import request, jsonify
+from werkzeug.utils import secure_filename
 from config import app,db
 from models import Medicamento
 from pipeline import etl
@@ -50,37 +51,53 @@ def listar_estabelecimentos_unicas():
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    # 1. Validação do arquivo
+    # 1. Validação básica: verifica se o ficheiro existe na requisição
     if 'file' not in request.files:
         return jsonify({"message": "Nenhum arquivo enviado"}), 400
 
     file = request.files['file']
+    
     if file.filename == '':
         return jsonify({"message": "Arquivo sem nome"}), 400
 
-    # 2. Caminhos (backend/uploads)
-    upload_path = os.path.join("uploads")
+    # 2. Configuração de caminhos e segurança
+    upload_path ="uploads"
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
 
-    file_path = os.path.join(upload_path, file.filename)
-    file.save(file_path)
-
+    # Limpa o nome do ficheiro para evitar ataques de Path Traversal
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(upload_path, filename)
+    
     try:
-        # 3. O Pipeline aciona o Banco de Dados
-        # Passe o caminho completo do arquivo para o seu processador
+        # 3. Salva o ficheiro temporariamente
+        file.save(file_path)
+
+        # 4. Aciona o Pipeline de ETL
+        # O ETL vai ler o ficheiro, limpar os dados e persistir no Banco
         etl(fileName=file_path) 
 
-        # 4. Retorno de sucesso para o React
-        # O React receberá esse 201 e saberá que os dados já estão no banco
+        # 5. Limpeza de disco: Remove o ficheiro após o processamento
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
         return jsonify({
-            "message": "Arquivo processado e dados salvos no banco com sucesso!"
+            "message": "Arquivo processado e dados atualizados no banco com sucesso!",
+            "status": "success"
         }), 201
 
     except Exception as e:
-        # Se o banco de dados falhar, o erro cai aqui
-        print(f"Erro no pipeline: {e}")
-        return jsonify({"message": f"Erro ao salvar no banco: {str(e)}"}), 500
+        # Se algo falhar no processamento ou no banco, garante que o erro chegue ao React
+        print(f"Erro no pipeline: {str(e)}")
+        
+        # # Tenta remover o ficheiro mesmo em caso de erro para não poluir o servidor
+        # if os.path.exists(file_path):
+        #     os.remove(file_path)
+            
+        return jsonify({
+            "message": f"Erro interno no processamento: {str(e)}",
+            "status": "error"
+        }), 500
 
 
 

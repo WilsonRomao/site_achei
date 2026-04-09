@@ -1,32 +1,37 @@
 from processamento_2 import limpeza_dos_dados
-# from processamento import processar_r84
 from models import Medicamento
 from config import db, app
 
 def etl(fileName):
-    # Chama o processamento do arquivo e retorna um DataFrame limpo
+    # 1. Extração e Limpeza
     df_limpo = limpeza_dos_dados(fileName)
     
+        # 2. Carga no Banco de Dados
+    
     with app.app_context():
-        for _, row in df_limpo.iterrows():
-            # Busca se o par (catmat, estabelecimento) já existe
-            existente = Medicamento.query.filter_by(
-                catmat=row['catmat'], 
-                estabelecimento_saude=row['estabelecimento_saude']
-            ).first()
+        try:
+            for _, row in df_limpo.iterrows():
+                # Busca pelo par da Chave Primária Composta
+                existente = Medicamento.query.get((row['estabelecimento_saude'],row['catmat']))
 
-            if existente:
-                # Atualiza a quantidade se já existir
-                existente.quantidade = row['quantidade']
-                existente.medicamento = row['medicamento']
-            else:
-                # Cria novo se não existir
-                novo = Medicamento(
-                    catmat=row['catmat'],
-                    medicamento=row['medicamento'],
-                    quantidade=row['quantidade'],
-                    estabelecimento_saude=row['estabelecimento_saude']
-                )
-                db.session.add(novo)
-        
-        db.session.commit()
+                if existente:
+                    # Atualiza apenas se a quantidade mudou (opcional, para ganho de performance)
+                    existente.quantidade = row['quantidade']
+                    existente.medicamento = row['medicamento']
+                else:
+                    novo = Medicamento(
+                        estabelecimento_saude=row['estabelecimento_saude'],
+                        catmat=row['catmat'],
+                        medicamento=row['medicamento'],
+                        quantidade=row['quantidade']                      
+                    )
+                    db.session.add(novo)
+            
+            # Commit único após processar todo o arquivo (muito mais rápido)
+            db.session.commit()
+            print(f"Sucesso: {fileName} processado e salvo.")
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erro ao salvar no banco: {e}")
+            raise e
