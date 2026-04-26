@@ -6,7 +6,9 @@ from pipeline import etl
 
 import os
 
-
+@app.route('/')
+def index_page():
+    return "<h1> Flask API </h1>"
 @app.route('/medicamentos', methods=['GET'])
 def listar_medicamentos():
     # 1. Captura parâmetros de paginação
@@ -59,7 +61,7 @@ def upload():
         return jsonify({"message": "Arquivo sem nome"}), 400
 
     # 2. Caminhos (backend/uploads)
-    upload_path = os.path.join("uploads")
+    upload_path = app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
 

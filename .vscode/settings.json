@@ -1,4 +1,6 @@
 {
     "python.analysis.autoImportCompletions": true,
-    "python.defaultInterpreterPath": "/home/wilson/Documentos/SISTEMAS DE INFORMAÇÃO/pet_saude/site_achei/.venv/bin/python"
+    "python.defaultInterpreterPath": "/home/wilson/Documentos/SISTEMAS DE INFORMAÇÃO/pet_saude/site_achei/.venv/bin/python",
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
+    "python-envs.defaultPackageManager": "ms-python.python:pip"
 }
