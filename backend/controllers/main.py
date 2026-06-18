@@ -11,6 +11,34 @@ def index_page():
     return "<h1> Flask API </h1>"
 @app.route('/medicamentos', methods=['GET'])
 def listar_medicamentos():
+    """
+    Lista os estoques de medicamentos com paginação e filtros.
+    ---
+    tags:
+      - Consulta Pública
+    parameters:
+      - name: page
+        in: query
+        type: integer
+        default: 1
+      - name: per_page
+        in: query
+        type: integer
+        default: 20
+      - name: q
+        in: query
+        type: string
+        description: Busca por nome do medicamento
+      - name: catmat
+        in: query
+        type: string
+      - name: estabelecimento
+        in: query
+        type: string
+    responses:
+      200:
+        description: Lista paginada de estoques
+    """
     # 1. Captura parâmetros de paginação
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int) # Itens por página
@@ -58,6 +86,15 @@ def listar_medicamentos():
 
 @app.route('/estabelecimentos', methods=['GET'])
 def listar_estabelecimentos_unicas():
+    """
+    Retorna uma lista simples com o nome de todos os estabelecimentos.
+    ---
+    tags:
+      - Consulta Pública
+    responses:
+      200:
+        description: Lista de strings
+    """
     from models import EstabelecimentoSaude
     estabelecimentos = EstabelecimentoSaude.query.order_by(EstabelecimentoSaude.nome).all()
     return jsonify([e.nome for e in estabelecimentos])
@@ -72,6 +109,29 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 @app.route("/upload", methods=["POST"])
 @jwt_required()
 def upload():
+    """
+    Faz o upload e processamento (ETL) da planilha do SUS.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: file
+        in: formData
+        type: file
+        required: true
+        description: Arquivo .xlsx de estoque
+    responses:
+      201:
+        description: Arquivo processado com sucesso
+      400:
+        description: Arquivo inválido
+      403:
+        description: Acesso negado
+    """
     claims = get_jwt()
     if "administrador" not in claims.get("perfis", []):
         return jsonify({"message": "Acesso negado. Apenas administradores podem fazer upload."}), 403

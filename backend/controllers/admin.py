@@ -14,6 +14,19 @@ def admin_required():
 @admin_bp.route('/usuarios', methods=['GET'])
 @jwt_required()
 def listar_usuarios():
+    """
+    Lista todos os usuários cadastrados.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Lista de usuários
+      403:
+        description: Acesso negado
+    """
     if not admin_required(): return jsonify({"message": "Acesso negado"}), 403
     usuarios = Usuario.query.all()
     return jsonify([u.to_json() for u in usuarios])
@@ -21,6 +34,34 @@ def listar_usuarios():
 @admin_bp.route('/usuarios', methods=['POST'])
 @jwt_required()
 def criar_usuario():
+    """
+    Cria proativamente um novo usuário no sistema.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+            senha:
+              type: string
+            perfis:
+              type: array
+              items:
+                type: string
+    responses:
+      201:
+        description: Usuário criado com sucesso
+      400:
+        description: Usuário já existe
+    """
     if not admin_required(): return jsonify({"message": "Acesso negado"}), 403
     data = request.get_json()
     email = data.get('email')
@@ -39,6 +80,34 @@ def criar_usuario():
 @admin_bp.route('/usuarios/<int:id>/perfis', methods=['PUT'])
 @jwt_required()
 def atualizar_perfis(id):
+    """
+    Atualiza a lista de perfis de um usuário.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            perfis:
+              type: array
+              items:
+                type: string
+    responses:
+      200:
+        description: Perfis atualizados com sucesso
+      403:
+        description: Acesso negado
+    """
     if not admin_required(): return jsonify({"message": "Acesso negado"}), 403
     usuario = Usuario.query.get_or_404(id)
     data = request.get_json()
@@ -54,6 +123,17 @@ def atualizar_perfis(id):
 @admin_bp.route('/solicitacoes', methods=['GET'])
 @jwt_required()
 def listar_solicitacoes():
+    """
+    Lista todas as solicitações de acesso pendentes e resolvidas.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Lista de solicitações
+    """
     if not admin_required(): return jsonify({"message": "Acesso negado"}), 403
     solicitacoes = SolicitacaoPerfil.query.order_by(SolicitacaoPerfil.data_solicitacao.desc()).all()
     return jsonify([s.to_json() for s in solicitacoes])
@@ -61,6 +141,29 @@ def listar_solicitacoes():
 @admin_bp.route('/solicitacoes/<int:id>/<acao>', methods=['POST'])
 @jwt_required()
 def processar_solicitacao(id, acao):
+    """
+    Aprova ou recusa a solicitação de perfil de um usuário.
+    ---
+    tags:
+      - Administrador
+    security:
+      - Bearer: []
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+      - name: acao
+        in: path
+        type: string
+        enum: [aprovar, recusar]
+        required: true
+    responses:
+      200:
+        description: Solicitação processada com sucesso
+      400:
+        description: Solicitação já processada ou ação inválida
+    """
     if not admin_required(): return jsonify({"message": "Acesso negado"}), 403
     
     solicitacao = SolicitacaoPerfil.query.get_or_404(id)
