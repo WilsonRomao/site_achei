@@ -7,6 +7,30 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    """
+    Registra um novo usuário no sistema.
+    ---
+    tags:
+      - Autenticação
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: usuario@teste.com
+            senha:
+              type: string
+              example: senha123
+    responses:
+      201:
+        description: Usuário cadastrado com sucesso
+      400:
+        description: Erro de validação
+    """
     data = request.get_json()
     email = data.get('email')
     senha = data.get('senha')
@@ -28,6 +52,30 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """
+    Realiza o login e retorna o Token JWT.
+    ---
+    tags:
+      - Autenticação
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: admin@achei.com
+            senha:
+              type: string
+              example: admin123
+    responses:
+      200:
+        description: Login realizado com sucesso
+      401:
+        description: Credenciais inválidas
+    """
     data = request.get_json()
     email = data.get('email')
     senha = data.get('senha')
@@ -51,6 +99,29 @@ def login():
 @auth_bp.route('/solicitar', methods=['POST'])
 @jwt_required()
 def solicitar_perfil():
+    """
+    Solicita a elevação de privilégio (novo perfil).
+    ---
+    tags:
+      - Autenticação
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            perfil:
+              type: string
+              example: prescritor
+    responses:
+      201:
+        description: Solicitação enviada com sucesso
+      400:
+        description: Perfil inválido ou solicitação pendente
+    """
     data = request.get_json()
     perfil_desejado = data.get('perfil')
     usuario_id = int(get_jwt_identity())

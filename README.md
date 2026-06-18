@@ -41,8 +41,9 @@ O ambiente de desenvolvimento está contêinerizado. Para subir o projeto do zer
 4. **Portas da Aplicação**:
    - **Frontend (Interface do Usuário)**: [http://localhost:3000](http://localhost:3000)
    - **Backend (API)**: `http://localhost:5000`
+   - **Backend (Swagger API Docs)**: [http://localhost:5000/apidocs](http://localhost:5000/apidocs)
    - **Banco (PostgreSQL)**: Porta interna `5432`
-   - **MinIO Console**: `http://localhost:9001`
+   - **MinIO Console**: [http://localhost:9001](http://localhost:9001)
 
 > 🔑 **Usuário Semente:** Ao inicializar a infraestrutura pela primeira vez, o Backend gera um usuário mestre com controle total. Use as credenciais `admin@achei.com` / `admin123` para acessar o Painel Administrativo de Usuários.
 
