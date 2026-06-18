@@ -1,120 +1,114 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-const MedicamentoList = () => {
-  const [medicamentos, setMedicamentos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+const MedicamentoList = ({ 
+  medicamentos, 
+  listaEstabelecimentos, 
+  filtros, 
+  onFilterChange, 
+  page, 
+  setPage, 
+  totalPages, 
+  loading 
+}) => {
   
-  // ESTADO QUE ESTAVA FALTANDO:
-  const [listaEstabelecimentos, setListaEstabelecimentos] = useState([]);
-
-  const [filtros, setFiltros] = useState({
-    catmat: "",
-    estabelecimento: "",
-    q: ""
-  });
-
-  // 1. Busca os estabelecimentos para o Datalist (Roda 1 vez)
-  useEffect(() => {
-    const buscarSugestoes = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/estabelecimentos");
-        const data = await response.json();
-        setListaEstabelecimentos(data);
-      } catch (error) {
-        console.error("Erro ao buscar estabelecimentos:", error);
-      }
-    };
-    buscarSugestoes();
-  }, []);
-
-  // 2. Busca os medicamentos filtrados
-  const carregarDados = async () => {
-    setLoading(true);
-    const params = new URLSearchParams({
-      page: page,
-      catmat: filtros.catmat,
-      estabelecimento: filtros.estabelecimento,
-      q: filtros.q
-    });
-
-    try {
-      const response = await fetch(`http://localhost:5000/medicamentos?${params.toString()}`);
-      const data = await response.json();
-      setMedicamentos(data.items || []);
-      setTotalPages(data.pages || 1);
-    } catch (error) {
-      console.error("Erro ao carregar medicamentos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    carregarDados();
-  }, [page, filtros]);
-
-  const handleFilterChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFiltros(prev => ({ ...prev, [name]: value }));
-    setPage(1);
+    onFilterChange({ [name]: value });
   };
 
   return (
-    <div>
-      <h2>Gestão de Medicamentos</h2>
+    <div className="mt-5">
+      <h4 className="achei-title mb-4">
+        Pesquisa de medicamentos disponíveis nas unidades básicas de saúde (UBS)
+      </h4>
 
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <input name="q" placeholder="Buscar descrição..." value={filtros.q} onChange={handleFilterChange} />
-        <input name="catmat" placeholder="CATMAT" value={filtros.catmat} onChange={handleFilterChange} />
-        
-        <input 
-          name="estabelecimento" 
-          list="lista-estabelecimentos" 
-          placeholder="Estabelecimento..." 
-          value={filtros.estabelecimento} 
-          onChange={handleFilterChange} 
-        />
-        <datalist id="lista-estabelecimentos">
-          {listaEstabelecimentos.map((est, index) => (
-            <option key={index} value={est} />
-          ))}
-        </datalist>
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-md-8">
+          <div className="input-group input-group-lg">
+            <input 
+              name="q" 
+              className="form-control custom-search-input border-end-0" 
+              placeholder="O que precisa achar hoje?" 
+              value={filtros.q} 
+              onChange={handleChange} 
+            />
+            <span className="input-group-text custom-search-btn bg-white">
+              <i className="bi bi-search"></i>
+            </span>
+          </div>
+        </div>
+        <div className="col-12 col-md-4">
+          <input 
+            name="estabelecimento" 
+            list="lista-estabelecimentos" 
+            className="form-control form-control-lg custom-search-input"
+            placeholder="Filtrar por Estabelecimento..." 
+            value={filtros.estabelecimento} 
+            onChange={handleChange} 
+          />
+          <datalist id="lista-estabelecimentos">
+            {listaEstabelecimentos.map((est, index) => (
+              <option key={index} value={est} />
+            ))}
+          </datalist>
+        </div>
       </div>
 
-      {loading ? <p>Carregando...</p> : (
-        <>
-          <table border="1" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f2f2f2" }}>
-                <th>Estabelecimento</th>
-                <th>CATMAT</th>
-                <th>Medicamento</th>
-                <th>Quantidade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {medicamentos.length > 0 ? medicamentos.map((item, index) => (
-                <tr key={`${item.catmat}-${item.estabelecimentoSaude}-${index}`}>
-                  <td>{item.estabelecimentoSaude}</td>
-                  <td>{item.catmat}</td>
-                  <td>{item.medicamento}</td>
-                  <td>{item.quantidade}</td>
-                </tr>
-              )) : (
-                <tr><td colSpan="4" style={{textAlign: "center"}}>Nenhum dado encontrado</td></tr>
-              )}
-            </tbody>
-          </table>
-
-          <div style={{ marginTop: "15px" }}>
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)}> Anterior </button>
-            <span> Página {page} de {totalPages} </span>
-            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}> Próximo </button>
+      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+        {loading ? (
+          <div className="text-center p-5 text-muted">
+            <div className="spinner-border text-info" role="status">
+              <span className="visually-hidden">Carregando...</span>
+            </div>
+            <p className="mt-2">Buscando estoques...</p>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <table className="table table-striped table-hover mb-0 align-middle">
+              <thead className="table-light text-muted">
+                <tr>
+                  <th className="ps-4 py-3 fw-normal">Medicamento</th>
+                  <th className="py-3 fw-normal">Estabelecimento</th>
+                  <th className="py-3 fw-normal text-center">Quantidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {medicamentos.length > 0 ? medicamentos.map((item, index) => (
+                  <tr key={`${item.catmat}-${item.estabelecimentoSaude}-${index}`}>
+                    <td className="ps-4 py-3 text-dark">{item.medicamento}</td>
+                    <td className="py-3 text-secondary">{item.estabelecimentoSaude}</td>
+                    <td className="py-3 text-center">
+                      <span className={`badge rounded-pill ${item.quantidade > 0 ? 'bg-success' : 'bg-danger'}`}>
+                        {item.quantidade}
+                      </span>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-5 text-muted">Nenhum medicamento encontrado para essa busca.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            <div className="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center py-3 px-4">
+              <button 
+                className="btn btn-outline-secondary rounded-pill px-4" 
+                disabled={page === 1} 
+                onClick={() => setPage(p => p - 1)}>
+                Anterior
+              </button>
+              <span className="text-muted small">Página {page} de {totalPages}</span>
+              <button 
+                className="btn btn-outline-secondary rounded-pill px-4" 
+                disabled={page === totalPages} 
+                onClick={() => setPage(p => p + 1)}>
+                Próximo
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

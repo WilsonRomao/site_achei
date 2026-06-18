@@ -1,75 +1,119 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import MedicamentoList from './MedicamentoList' 
 import UploadFile from './upload'
+import Auth from './Auth'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import AdminPanel from './components/AdminPanel'
+import { apiService } from './services/api'
 import './App.css'
 
 function App() {
-  // 1. Estados para os dados da API
+  const [user, setUser] = useState(null)
+  
   const [medicamentos, setMedicamentos] = useState([])
+  const [listaEstabelecimentos, setListaEstabelecimentos] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  // 2. Estados para os Filtros
   const [filtros, setFiltros] = useState({
     q: '',
     catmat: '',
     estabelecimento: ''
   })
 
-  // 3. Função de busca atualizada para aceitar parâmetros
-  const fetchMedicamentos = async () => {
-    setLoading(true)
-    
-    // Constrói a URL com os filtros atuais
-    const params = new URLSearchParams({
-      page: page,
-      q: filtros.q,
-      catmat: filtros.catmat,
-      estabelecimento: filtros.estabelecimento
-    })
+  useEffect(() => {
+    const savedUser = localStorage.getItem("usuario");
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      // Proteção contra cache da versão antiga (antes dos múltiplos perfis)
+      if (!parsedUser.perfis) {
+        localStorage.removeItem("usuario");
+        localStorage.removeItem("token");
+        window.location.reload();
+      } else {
+        setUser(parsedUser);
+      }
+    }
+  }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    const carregarEstabelecimentos = async () => {
+      try {
+        const dados = await apiService.getEstabelecimentos();
+        setListaEstabelecimentos(dados);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    carregarEstabelecimentos();
+  }, [user]);
+
+  const fetchMedicamentos = useCallback(async () => {
+    if (!user) return;
+    setLoading(true)
     try {
-      // Importante: verifique se a rota no Flask é /medicamento ou /medicamentos
-      const response = await fetch(`http://127.0.0.1:5000/medicamentos?${params.toString()}`)
-      const data = await response.json()
-      
-      // Ajuste conforme o formato que o seu Flask retorna (data.items ou data.Medicamento)
+      const data = await apiService.getMedicamentos({ page, ...filtros });
       setMedicamentos(data.items || []) 
       setTotalPages(data.pages || 1)
     } catch (error) {
-      console.error("Erro ao buscar dados:", error)
+      console.error(error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, filtros, user]);
 
-  // 4. Efeito disparado quando a página ou os filtros mudam
   useEffect(() => {
     fetchMedicamentos()
-  }, [page, filtros])
+  }, [fetchMedicamentos])
 
-  // Função para atualizar os filtros de forma centralizada
   const handleFilterChange = (novoFiltro) => {
     setFiltros(prev => ({ ...prev, ...novoFiltro }))
-    setPage(1) // Sempre volta para a primeira página ao filtrar
+    setPage(1)
+  }
+
+  const handleUploadSuccess = () => {
+    fetchMedicamentos();
+  }
+
+  const handleLogout = () => {
+    apiService.logout();
+    setUser(null);
+  }
+
+  if (!user) {
+    return <Auth onLogin={setUser} />;
   }
 
   return (
-    <div className="container">
-      <UploadFile />
+    <div className="app-wrapper bg-light min-vh-100">
+      <Navbar user={user} onLogout={handleLogout} />
+      <Hero />
       
-      <hr />
-
-      {/* Passamos os dados e as funções de controle para o componente de lista */}
-      <MedicamentoList 
-        Medicamento={medicamentos} 
-        onFilterChange={handleFilterChange}
-        page={page}
-        setPage={setPage}
-        totalPages={totalPages}
-        loading={loading}
-      />
+      <main className="container pb-5">
+        
+        {user.perfis.includes("administrador") && (
+          <div className="mt-4">
+            <UploadFile onSuccess={handleUploadSuccess} />
+            <div className="mt-4">
+              <AdminPanel />
+            </div>
+          </div>
+        )}
+        
+        <MedicamentoList 
+          medicamentos={medicamentos} 
+          listaEstabelecimentos={listaEstabelecimentos}
+          filtros={filtros}
+          onFilterChange={handleFilterChange}
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+          loading={loading}
+        />
+      </main>
     </div>
   )
 }
