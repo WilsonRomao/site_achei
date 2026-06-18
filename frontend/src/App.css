@@ -1,2 +1,79 @@
+:root {
+  --achei-teal: #3ab2ab;
+  --achei-blue: #14355f;
+  --achei-light-blue: #b3dfec;
+  --achei-gray: #6c757d;
+  --achei-bg-light: #f8f9fa;
+}
 
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: #ffffff;
+  color: #333333;
+  margin: 0;
+}
 
+/* Remover os botões padrões do Vite */
+button {
+  all: unset;
+}
+
+.custom-search-input {
+  border: 2px solid var(--achei-teal);
+  border-radius: 8px;
+  padding-left: 15px;
+}
+
+.custom-search-input:focus {
+  box-shadow: none;
+  border-color: var(--achei-blue);
+}
+
+.custom-search-btn {
+  background-color: white;
+  border: 2px solid var(--achei-teal);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: var(--achei-teal);
+}
+
+.achei-title {
+  color: var(--achei-teal);
+  font-weight: 600;
+}
+
+.hero-banner {
+  background: linear-gradient(180deg, #c3e8f4 0%, #e0f2f8 100%);
+  padding: 40px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.hero-title {
+  font-size: 6rem;
+  font-weight: 800;
+  color: var(--achei-blue);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.hero-subtitle {
+  color: var(--achei-gray);
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
+
+.hero-icon {
+  font-size: 6rem;
+  color: var(--achei-teal);
+  text-shadow: 2px 2px 10px rgba(255,255,255,0.8);
+}
