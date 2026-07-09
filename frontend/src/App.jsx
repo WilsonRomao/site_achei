@@ -7,6 +7,7 @@ import Hero from './components/Hero'
 import AdminPanel from './components/AdminPanel'
 import { apiService } from './services/api'
 import './App.css'
+import Mapa from './Mapa';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -93,6 +94,7 @@ function App() {
       <Hero />
       
       <main className="container pb-5">
+        <Mapa />
         
         {user.perfis.includes("administrador") && (
           <div className="mt-4">
