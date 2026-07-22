@@ -1,3 +1,13 @@
 from django.db import models
 
-# Create your models here.
+
+class EstabelecimentoSaude(models.Model):
+    nome = models.TextField(unique=True)
+
+    class Meta:
+        db_table = "estabelecimento_saude"
+        verbose_name = "Estabelecimento de Saúde"
+        verbose_name_plural = "Estabelecimentos de Saúde"
+
+    def __str__(self):
+        return self.nome
