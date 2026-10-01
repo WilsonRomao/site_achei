@@ -10,6 +10,56 @@ const UploadFile = ({ onSuccess }) => {
     setFile(e.target.files[0])
   }
 
+  const handleDownloadTemplate = () => {
+    const csvContent = [
+      [
+        "nome_estabelecimento",
+        "gestor",
+        "telefone",
+        "email",
+        "endereco",
+        "horario",
+        "catmat",
+        "medicamento",
+        "quantidade"
+      ],
+      [
+        "UBS Centro",
+        "Ana Souza",
+        "(67) 99999-0000",
+        "ubs.centro@teste.com",
+        "Rua A, 10",
+        "08:00-17:00",
+        "BR123456",
+        "Paracetamol",
+        "12"
+      ],
+      [
+        "UBS Centro",
+        "Ana Souza",
+        "(67) 99999-0000",
+        "ubs.centro@teste.com",
+        "Rua A, 10",
+        "08:00-17:00",
+        "BR654321",
+        "Ibuprofeno",
+        "5"
+      ]
+    ]
+      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "modelo_upload_achei.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!file) return alert("Por favor, selecione um arquivo primeiro!");
@@ -18,13 +68,11 @@ const UploadFile = ({ onSuccess }) => {
     try {
       const response = await apiService.uploadFile(file);
       alert(response.message || "Arquivo enviado com sucesso!");
-      
-      // Limpa os estados
+
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      
-      // Chama o hook de sucesso para recarregar os dados na tabela
-      if (onSuccess) onSuccess(); 
+
+      if (onSuccess) onSuccess();
     } catch (error) {
       alert(error.message);
     } finally {
@@ -41,25 +89,35 @@ const UploadFile = ({ onSuccess }) => {
         </h5>
         <span className="badge bg-warning text-dark">Painel do Administrador</span>
       </div>
-      
+
       <p className="text-muted small mb-3">
-        Selecione a planilha Excel mais recente (.xls ou .xlsx) contendo os dados dos estoques de todas as unidades.
+        Selecione uma planilha em Excel ou CSV. O sistema aceita tanto o formato antigo quanto o formato com colunas nomeadas: nome_estabelecimento, catmat, medicamento, quantidade e campos extras do estabelecimento.
       </p>
 
-      <form onSubmit={onSubmit} className="d-flex align-items-center gap-3">
+      <div className="alert alert-light border mb-3 small text-muted">
+        Cabeçalhos suportados: nome_estabelecimento, gestor, telefone, email, endereco, horario, catmat, medicamento, quantidade.
+      </div>
+
+      <div className="d-flex justify-content-end mb-3">
+        <button type="button" className="btn btn-outline-primary btn-sm" onClick={handleDownloadTemplate}>
+          Baixar modelo CSV
+        </button>
+      </div>
+
+      <form onSubmit={onSubmit} className="d-flex align-items-center gap-3 flex-wrap">
         <div className="flex-grow-1">
-          <input 
-            type="file" 
-            className="form-control" 
-            id="file" 
-            onChange={onFileChange} 
+          <input
+            type="file"
+            className="form-control"
+            id="file"
+            onChange={onFileChange}
             ref={fileInputRef}
-            accept=".xls,.xlsx"
+            accept=".xls,.xlsx,.csv"
           />
         </div>
-        <button 
-          type="submit" 
-          className="btn text-white px-4 fw-bold" 
+        <button
+          type="submit"
+          className="btn text-white px-4 fw-bold"
           style={{ backgroundColor: "var(--achei-teal)" }}
           disabled={loading || !file}
         >

@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Helper para obter os headers padrões com o Token
 const getHeaders = () => {
@@ -8,7 +8,7 @@ const getHeaders = () => {
 
 export const apiService = {
   async register(email, senha) {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/auth/register/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha })
@@ -21,7 +21,7 @@ export const apiService = {
   },
 
   async solicitarPerfil(perfil) {
-    const response = await fetch(`${API_BASE_URL}/auth/solicitar`, {
+    const response = await fetch(`${API_BASE_URL}/auth/solicitar/`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...getHeaders() },
       body: JSON.stringify({ perfil })
@@ -79,7 +79,7 @@ export const apiService = {
 
 
   async login(email, senha) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha })
@@ -100,19 +100,28 @@ export const apiService = {
   },
 
   async getEstabelecimentos() {
-    const response = await fetch(`${API_BASE_URL}/estabelecimentos`, {
-      headers: getHeaders()
-    });
+    const response = await fetch(`${API_BASE_URL}/estabelecimentos/`);
     if (!response.ok) throw new Error("Erro ao buscar estabelecimentos");
     return response.json();
   },
 
   async getMedicamentos(params) {
     const query = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/medicamentos?${query}`, {
+    const response = await fetch(`${API_BASE_URL}/medicamentos/?${query}`, {
       headers: getHeaders()
     });
     if (!response.ok) throw new Error("Erro ao carregar medicamentos");
+    return response.json();
+  },
+
+  async getEstoquePorEstabelecimento(estabelecimento) {
+    const params = new URLSearchParams({
+      estabelecimento,
+      page: "1",
+      per_page: "1000",
+    });
+    const response = await fetch(`${API_BASE_URL}/estoque/?${params}`);
+    if (!response.ok) throw new Error("Erro ao carregar o estoque da unidade");
     return response.json();
   },
 
@@ -120,9 +129,9 @@ export const apiService = {
     const formData = new FormData();
     formData.append("file", file);
     
-    const response = await fetch(`${API_BASE_URL}/upload`, {
+    const response = await fetch(`${API_BASE_URL}/uploads/`, {
       method: "POST",
-      headers: getHeaders(), // O fetch cuida do Content-Type multipart boundary sozinho
+      headers: getHeaders(),
       body: formData,
     });
     

@@ -16,7 +16,7 @@ O visual foi projetado para ser leve, rápido e idêntico a um protótipo focado
 - `/components/Navbar.jsx`: Barra de navegação com menu interativo onde o usuário lê seus múltiplos cargos e lança solicitações formais para ser promovido (ex: Médico Prescritor).
 - `/components/AdminPanel.jsx`: O coração da moderação. Exibido apenas para Administradores. Possui um sistema de abas para Aprovar Requisições ou Cadastrar novos colegas de equipe sob demanda.
 - `MedicamentoList.jsx`: Exibe a tabela "Zebrada" (Clean Table) de estoques conectada diretamente ao Banco PostgreSQL via paginação para poupar memória.
-- `services/api.js`: Abstração de todo o `fetch()` assíncrono. Cuida da injeção autônoma do `Bearer Token` JWT no cabeçalho das requisições seguras da API Flask.
+- `services/api.js`: Abstração de todo o `fetch()` assíncrono. Cuida da injeção autônoma do `Bearer Token` JWT no cabeçalho das requisições seguras da API Django.
 
 ## 🔧 Scripts Úteis
 

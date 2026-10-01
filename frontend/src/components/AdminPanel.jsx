@@ -183,7 +183,7 @@ const AdminPanel = () => {
                     ) : solicitacoes.map(s => (
                       <tr key={s.id}>
                         <td>{s.data_solicitacao}</td>
-                        <td className="fw-bold">{s.email_usuario}</td>
+                        <td className="fw-bold">{s.usuario_email}</td>
                         <td><span className="badge bg-secondary">{s.perfil_solicitado}</span></td>
                         <td>
                           <span className={`badge ${s.status === 'pendente' ? 'bg-warning text-dark' : (s.status === 'aprovado' ? 'bg-success' : 'bg-danger')}`}>

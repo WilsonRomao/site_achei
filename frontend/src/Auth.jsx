@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { apiService } from "./services/api";
 
-const Auth = ({ onLogin }) => {
+const Auth = ({ onLogin, onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -36,7 +36,7 @@ const Auth = ({ onLogin }) => {
           <i className="bi bi-shield-lock text-primary" style={{ fontSize: "3rem", color: "var(--achei-teal) !important" }}></i>
           <h3 className="fw-bold text-dark mt-2">{isLogin ? "Acesso Restrito" : "Novo Cadastro"}</h3>
           <p className="text-muted small">
-            {isLogin ? "Faça login para consultar o estoque das UBS" : "Cadastre-se para acessar o sistema"}
+            {isLogin ? "Faça login para acessar a área restrita" : "Cadastre-se para acessar a área restrita"}
           </p>
         </div>
 
@@ -79,6 +79,9 @@ const Auth = ({ onLogin }) => {
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin ? "Ainda não tem conta? Clique aqui" : "Já possui conta? Voltar ao Login"}
+          </button>
+          <button className="btn btn-link text-decoration-none text-muted" onClick={onBack}>
+            Voltar para a página inicial
           </button>
         </div>
 

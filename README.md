@@ -11,7 +11,7 @@ Este ecossistema foi desenhado com foco em **escalabilidade**, **segurança** e 
 A infraestrutura completa roda de maneira local via `docker-compose`, espelhando perfeitamente um ambiente de nuvem de produção.
 
 - **Frontend**: Aplicação SPA feita em **React** (via Vite), estilizada com **Bootstrap 5**. Responsável por entregar uma experiência limpa, fluida e responsiva para o usuário final.
-- **Backend**: Servidor REST construído em **Flask** (Python). Gerencia a ingestão dos dados (ETL de planilhas de estoque), autenticação com tokens JWT e fornece as rotas de consumo para o Frontend.
+- **Backend**: API REST construída em **Django REST Framework**. Gerencia a ingestão dos dados (ETL de planilhas de estoque), autenticação com tokens JWT e fornece as rotas de consumo para o Frontend.
 - **Banco de Dados**: Utilizamos **PostgreSQL**, estruturado no modelo relacional 3FN (com tabelas de Medicamentos, Estabelecimentos e Estoques), garantindo integridade das informações.
 - **Storage**: Para armazenar e versionar as planilhas do SUS (com milhares de linhas), acoplamos um servidor **MinIO**, que atua como um "Clone do Amazon S3", abstraindo o armazenamento local.
 
@@ -40,8 +40,8 @@ O ambiente de desenvolvimento está contêinerizado. Para subir o projeto do zer
 
 4. **Portas da Aplicação**:
    - **Frontend (Interface do Usuário)**: [http://localhost:3000](http://localhost:3000)
-   - **Backend (API)**: `http://localhost:5000`
-   - **Backend (Swagger API Docs)**: [http://localhost:5000/apidocs](http://localhost:5000/apidocs)
+   - **Backend (API)**: `http://localhost:8000`
+   - **Backend (Django Admin)**: [http://localhost:8000/admin/](http://localhost:8000/admin/)
    - **Banco (PostgreSQL)**: Porta interna `5432`
    - **MinIO Console**: [http://localhost:9001](http://localhost:9001)
 
@@ -57,7 +57,7 @@ O ACHEI não possui apenas um cargo por pessoa. Cada usuário cadastrado possui 
 - **Administrador**: Tem acesso ao Painel de Controle, aprova/recusa solicitações de acessos de outros usuários e faz upload da planilha mensal de estoques para atualizar o sistema.
 
 Para informações mais aprofundadas sobre como codificar em cada ecossistema, consulte os sub-guias:
-- ➡️ [Leia o README do Backend](./backend/README.md)
+- ➡️ [Leia o README do Backend](./backend_django/README.md)
 - ➡️ [Leia o README do Frontend](./frontend/README.md)
 
 ---

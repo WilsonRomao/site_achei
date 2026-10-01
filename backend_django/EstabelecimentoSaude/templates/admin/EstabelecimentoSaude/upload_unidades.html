@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="submit-row">
+      <input type="submit" value="Importar unidades" class="default">
+      <a href="../" class="button cancel-link">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

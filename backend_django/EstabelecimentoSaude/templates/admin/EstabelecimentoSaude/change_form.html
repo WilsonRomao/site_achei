@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="../upload-unidades/">Importar planilha InfoUSF</a>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+  <div class="submit-row">
+    <a href="../upload-unidades/" class="button">Importar planilha InfoUSF</a>
+  </div>
+  {{ block.super }}
+{% endblock %}

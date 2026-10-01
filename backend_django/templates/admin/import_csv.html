@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <p>Selecione um arquivo CSV preenchido conforme o modelo.</p>
+  <p><a href="{{ download_url }}" class="button">Baixar modelo CSV</a></p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="submit-row">
+      <input type="submit" value="Importar CSV" class="default">
+      <a href="../" class="button cancel-link">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}
