@@ -143,12 +143,12 @@ function App() {
                         </thead>
                         <tbody>
                           {estoqueUnidade.map((item) => {
-                            const disponivel = Number(item.quantidade) > 0
+                            const disponivel = item.disponibilidade === "Disponível" || Number(item.quantidade) > 0
                             return (
                               <tr key={`${item.catmat}-${item.medicamento}`}>
                                 <td>{item.medicamento}</td>
                                 <td className={disponivel ? "available-text" : "unavailable-text"}>
-                                  {disponivel ? "Disponível" : "Indisponível"}
+                                  {item.disponibilidade || (disponivel ? "Disponível" : "Indisponível")}
                                 </td>
                                 {restrictedArea && user && <td>{item.quantidade}</td>}
                               </tr>

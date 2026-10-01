@@ -6,19 +6,18 @@ from django.db import transaction
 
 from .models import EstabelecimentoSaude
 
-
+# Esta função normaliza o nome das colunas da planilha para facilitar a correspondência com os campos do modelo.
 def _normalizar_coluna(valor):
     texto = unicodedata.normalize("NFKD", str(valor or ""))
     texto = texto.encode("ascii", "ignore").decode("ascii").lower()
     return re.sub(r"[^a-z0-9]", "", texto)
-
 
 def _texto(valor):
     if pd.isna(valor):
         return ""
     return str(valor).strip()
 
-
+#
 def _coordenada(valor):
     texto = _texto(valor).replace(",", ".")
     if not texto:
@@ -28,7 +27,7 @@ def _coordenada(valor):
         numero /= 1_000_000
     return numero
 
-
+# Esta função trata o campo CNES, removendo possíveis sufixos ".0" que podem aparecer em planilhas do Excel.
 def _cnes(valor):
     texto = _texto(valor)
     if not texto:
@@ -37,7 +36,7 @@ def _cnes(valor):
         texto = texto[:-2]
     return texto
 
-
+# Esta função importa os dados das unidades de saúde a partir de um arquivo Excel, criando ou atualizando registros no banco de dados.
 @transaction.atomic
 def importar_unidades(arquivo):
     df = pd.read_excel(arquivo)

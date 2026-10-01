@@ -70,8 +70,8 @@ class UsuarioAdmin(admin.ModelAdmin):
 	def modelo_csv(self, request):
 		return csv_download_response(
 			"modelo_usuarios.csv",
-			["email", "senha", "perfis", "is_staff", "is_superuser", "is_active"],
-			["usuario@exemplo.com", "senha1234", "padrão|prescritor", "false", "false", "true"],
+			["email", "senha", "perfis", "is_staff", "is_active"],
+			["usuario@exemplo.com", "senha1234", "padrão|prescritor", "false", "true"],
 		)
 
 

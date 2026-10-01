@@ -26,15 +26,18 @@ class EstoqueListView(APIView):
         if q:
             queryset = queryset.filter(medicamento__medicamento__icontains=q)
 
-        page = int(request.query_params.get("page", 1))
-        per_page = int(request.query_params.get("per_page", 20))
+        try:
+            page = max(int(request.query_params.get("page", 1)), 1)
+            per_page = min(max(int(request.query_params.get("per_page", 20)), 1), 100)
+        except ValueError:
+            return Response({"message": "Parâmetros de paginação inválidos."}, status=status.HTTP_400_BAD_REQUEST)
 
         total = queryset.count()
         start = (page - 1) * per_page
         end = start + per_page
         page_items = queryset[start:end]
 
-        serializer = EstoqueSerializer(page_items, many=True)
+        serializer = EstoqueSerializer(page_items, many=True, context={"request": request})
 
         return Response(
             {

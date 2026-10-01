@@ -7,10 +7,18 @@ class EstoqueSerializer(serializers.ModelSerializer):
     catmat = serializers.SerializerMethodField()
     medicamento = serializers.SerializerMethodField()
     estabelecimentoSaude = serializers.SerializerMethodField()
+    disponibilidade = serializers.SerializerMethodField()
 
     class Meta:
         model = Estoque
-        fields = ["catmat", "medicamento", "quantidade", "estabelecimentoSaude"]
+        fields = ["catmat", "medicamento", "quantidade", "disponibilidade", "estabelecimentoSaude"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            fields.pop("quantidade", None)
+        return fields
 
     def get_catmat(self, obj):
         return obj.medicamento.catmat
@@ -20,3 +28,6 @@ class EstoqueSerializer(serializers.ModelSerializer):
 
     def get_estabelecimentoSaude(self, obj):
         return obj.estabelecimento.nome
+
+    def get_disponibilidade(self, obj):
+        return "Disponível" if obj.quantidade > 0 else "Indisponível"

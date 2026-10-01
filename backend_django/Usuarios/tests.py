@@ -1,8 +1,10 @@
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from .models import SolicitacaoPerfil, Usuario
+from .importers import importar_usuarios
 
 
 class UsuarioAuthTests(TestCase):
@@ -45,6 +47,30 @@ class UsuarioAuthTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
+
+    def test_login_rejects_inactive_user(self):
+        user = Usuario.objects.create_user(email="inativo@teste.com", password="senha1234")
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+
+        response = self.client.post(
+            reverse("login"),
+            {"email": "inativo@teste.com", "senha": "senha1234"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_csv_import_cannot_create_superuser(self):
+        importar_usuarios(SimpleUploadedFile(
+            "usuarios.csv",
+            b"email,senha,perfis,is_staff,is_superuser,is_active\n"
+            b"csv@teste.com,senha1234,administrador,true,true,true\n",
+        ))
+
+        usuario = Usuario.objects.get(email="csv@teste.com")
+        self.assertTrue(usuario.is_staff)
+        self.assertFalse(usuario.is_superuser)
 
     def test_admin_user_list_requires_admin_profile(self):
         user = Usuario.objects.create_user(email="padrao@teste.com", password="senha1234")

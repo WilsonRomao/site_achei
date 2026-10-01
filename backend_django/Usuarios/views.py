@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import SolicitacaoPerfil, Usuario
+from .permissions import IsAdministrador
 from .serializers import (
     RegisterSerializer,
     SolicitacaoPerfilSerializer,
@@ -41,7 +42,7 @@ class LoginView(APIView):
             )
 
         user = Usuario.objects.filter(email=email).first()
-        if user is None or not user.check_password(password):
+        if user is None or not user.is_active or not user.check_password(password):
             return Response(
                 {"message": "Credenciais inválidas"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -82,20 +83,14 @@ class SolicitarPerfilView(APIView):
 
 
 class AdminUserListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrador]
 
     def get(self, request, *args, **kwargs):
-        if "administrador" not in (request.user.perfis or []):
-            return Response({"message": "Acesso negado."}, status=status.HTTP_403_FORBIDDEN)
-
         usuarios = Usuario.objects.all().order_by("email")
         serializer = UsuarioAdminSerializer(usuarios, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        if "administrador" not in (request.user.perfis or []):
-            return Response({"message": "Acesso negado."}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = RegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -109,12 +104,9 @@ class AdminUserListCreateView(APIView):
 
 
 class AdminUserPerfilUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrador]
 
     def put(self, request, pk, *args, **kwargs):
-        if "administrador" not in (request.user.perfis or []):
-            return Response({"message": "Acesso negado."}, status=status.HTTP_403_FORBIDDEN)
-
         try:
             usuario = Usuario.objects.get(pk=pk)
         except Usuario.DoesNotExist:
@@ -127,24 +119,18 @@ class AdminUserPerfilUpdateView(APIView):
 
 
 class AdminSolicitacaoListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrador]
 
     def get(self, request, *args, **kwargs):
-        if "administrador" not in (request.user.perfis or []):
-            return Response({"message": "Acesso negado."}, status=status.HTTP_403_FORBIDDEN)
-
         solicitacoes = SolicitacaoPerfil.objects.select_related("usuario").order_by("-data_solicitacao")
         serializer = SolicitacaoPerfilSerializer(solicitacoes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdminSolicitacaoActionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrador]
 
     def post(self, request, pk, acao, *args, **kwargs):
-        if "administrador" not in (request.user.perfis or []):
-            return Response({"message": "Acesso negado."}, status=status.HTTP_403_FORBIDDEN)
-
         if acao not in ["aprovar", "recusar"]:
             return Response({"message": "Ação inválida."}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -52,12 +52,20 @@ function Mapa({ onSelectUnidade }) {
     const unidadesComCoordenadas = unidades
       .filter((unidade) => Number.isFinite(Number(unidade.latitude)) && Number.isFinite(Number(unidade.longitude)))
       .map((unidade) => {
-      const detalhes = [
-        `<b>${unidade.nome}</b>`,
+      const detalhes = document.createElement("div");
+      const titulo = document.createElement("strong");
+      titulo.textContent = unidade.nome || "Unidade de saúde";
+      detalhes.appendChild(titulo);
+
+      [
         unidade.endereco,
         unidade.telefone,
         unidade.horario ? `Horário: ${unidade.horario}` : null,
-      ].filter(Boolean).join("<br>");
+      ].filter(Boolean).forEach((texto) => {
+        const linha = document.createElement("div");
+        linha.textContent = texto;
+        detalhes.appendChild(linha);
+      });
 
       return L.marker([unidade.latitude, unidade.longitude])
         .bindPopup(detalhes)

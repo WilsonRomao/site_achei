@@ -18,9 +18,9 @@ def _booleano(valor, padrao=False):
 def importar_usuarios(arquivo):
     texto = arquivo.read().decode("utf-8-sig")
     leitor = csv.DictReader(io.StringIO(texto))
-    obrigatorias = {"email", "senha", "perfis", "is_staff", "is_superuser", "is_active"}
+    obrigatorias = {"email", "senha", "perfis", "is_staff", "is_active"}
     if not obrigatorias.issubset(leitor.fieldnames or []):
-        raise ValueError("O CSV deve conter email, senha, perfis, is_staff, is_superuser e is_active.")
+        raise ValueError("O CSV deve conter email, senha, perfis, is_staff e is_active.")
 
     criados = 0
     atualizados = 0
@@ -46,7 +46,8 @@ def importar_usuarios(arquivo):
             usuario = Usuario(email=email)
         usuario.perfis = perfis or ["padrão"]
         usuario.is_staff = _booleano(linha.get("is_staff"))
-        usuario.is_superuser = _booleano(linha.get("is_superuser"))
+        if criado:
+            usuario.is_superuser = False
         usuario.is_active = _booleano(linha.get("is_active"), True)
         if senha:
             usuario.set_password(senha)
