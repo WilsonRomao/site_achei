@@ -35,12 +35,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   frontend:
-    build: ./frontend
+    build: ./frontend_vue
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend_vue:/app
+      - frontend_vue_node_modules:/app/node_modules
     environment:
       - VITE_API_URL=http://localhost:8000/api
     depends_on:
@@ -59,5 +59,6 @@ services:
     command: server /data --console-address ":9001"
 
 volumes:
+  frontend_vue_node_modules:
   minio_data:
   postgres_data:

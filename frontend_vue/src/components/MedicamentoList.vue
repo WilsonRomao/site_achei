@@ -43,8 +43,8 @@
 
           <option
             v-for="(estabelecimento, index) in listaEstabelecimentos"
-            :key="index"
-            :value="estabelecimento"
+            :key="estabelecimento.id || index"
+            :value="estabelecimento.nome"
           />
 
         </datalist>
@@ -124,12 +124,13 @@
                 <span
                   class="badge rounded-pill"
                   :class="
+                    item.disponibilidade === 'Disponível' ||
                     item.quantidade > 0
                       ? 'bg-success'
                       : 'bg-danger'
                   "
                 >
-                  {{ item.quantidade }}
+                  {{ item.quantidade ?? item.disponibilidade }}
                 </span>
 
               </td>

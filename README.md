@@ -10,7 +10,7 @@ Este ecossistema foi desenhado com foco em **escalabilidade**, **segurança** e 
 
 A infraestrutura completa roda de maneira local via `docker-compose`, espelhando perfeitamente um ambiente de nuvem de produção.
 
-- **Frontend**: Aplicação SPA feita em **React** (via Vite), estilizada com **Bootstrap 5**. Responsável por entregar uma experiência limpa, fluida e responsiva para o usuário final.
+- **Frontend**: Aplicação SPA feita em **Vue 3** (via Vite), estilizada com **Bootstrap 5**. Responsável por entregar uma experiência limpa, fluida e responsiva para o usuário final.
 - **Backend**: API REST construída em **Django REST Framework**. Gerencia a ingestão dos dados (ETL de planilhas de estoque), autenticação com tokens JWT e fornece as rotas de consumo para o Frontend.
 - **Banco de Dados**: Utilizamos **PostgreSQL**, estruturado no modelo relacional 3FN (com tabelas de Medicamentos, Estabelecimentos e Estoques), garantindo integridade das informações.
 - **Storage**: Para armazenar e versionar as planilhas do SUS (com milhares de linhas), acoplamos um servidor **MinIO**, que atua como um "Clone do Amazon S3", abstraindo o armazenamento local.
@@ -45,7 +45,30 @@ O ambiente de desenvolvimento está contêinerizado. Para subir o projeto do zer
    - **Banco (PostgreSQL)**: Porta interna `5432`
    - **MinIO Console**: [http://localhost:9001](http://localhost:9001)
 
-> 🔑 **Usuário Semente:** Ao inicializar a infraestrutura pela primeira vez, o Backend gera um usuário mestre com controle total. Use as credenciais `admin@achei.com` / `admin123` para acessar o Painel Administrativo de Usuários.
+> Para criar o primeiro administrador, execute `python manage.py createsuperuser` no ambiente do backend. Não há uma conta administrativa criada automaticamente.
+
+## ☁️ Preparar deploy de teste (Render, Neon e Vercel)
+
+Os arquivos `render.yaml` e `frontend_vue/vercel.json` preparam a configuração
+dos serviços; ainda é necessário conectá-los às contas e informar as variáveis
+secretas nos painéis:
+
+1. Crie um banco PostgreSQL no Neon e copie a connection string com SSL.
+2. No Render, crie um Blueprint a partir do repositório. Configure:
+   - `DATABASE_URL`: connection string do Neon.
+   - `ALLOWED_HOSTS`: hostname exato do serviço Django no Render.
+   - `CORS_ALLOWED_ORIGINS`: origem exata do site Vercel, sem caminho, por
+     exemplo `https://achei.vercel.app`.
+   - `DJANGO_SECRET_KEY` é gerada pelo Blueprint; mantenha `DJANGO_DEBUG=False`.
+3. Na Vercel, selecione `frontend_vue` como Root Directory. Configure
+   `VITE_API_URL` com a URL pública do Render terminada em `/api`.
+4. Crie o primeiro administrador com `python manage.py createsuperuser` no
+   Shell do serviço Render.
+5. Após os deploys, teste `/api/estabelecimentos/`, `/api/estoque/` e `/admin/`.
+
+O deploy de teste deixa `S3_ENABLED=False`. Os uploads de planilhas exigem um
+storage compatível com S3 configurado separadamente; o MinIO do Docker local
+não é acessível pelo Render.
 
 ---
 
@@ -58,7 +81,7 @@ O ACHEI não possui apenas um cargo por pessoa. Cada usuário cadastrado possui 
 
 Para informações mais aprofundadas sobre como codificar em cada ecossistema, consulte os sub-guias:
 - ➡️ [Leia o README do Backend](./backend_django/README.md)
-- ➡️ [Leia o README do Frontend](./frontend/README.md)
+- ➡️ [Leia o README do Frontend Vue](./frontend_vue/README.md)
 
 ---
 
